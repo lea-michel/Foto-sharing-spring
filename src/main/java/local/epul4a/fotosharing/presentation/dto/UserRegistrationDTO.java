@@ -11,8 +11,14 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class UserLoginDTO {
+public class UserRegistrationDTO {
     private Long id;
+
+    @NotEmpty
+    private String firstName;
+
+    @NotEmpty
+    private String lastName;
 
     @NotEmpty(message = "Le courriel ne doit pas être vide")
     @Email
@@ -20,5 +26,4 @@ public class UserLoginDTO {
 
     @NotEmpty(message = "Le mot de passe ne doit pas être vide")
     private String password;
-
 }
