@@ -2,9 +2,8 @@ package local.epul4a.fotosharing.service.user;
 
 import local.epul4a.fotosharing.data.entity.User;
 import local.epul4a.fotosharing.persistence.repository.UserRepository;
-import local.epul4a.fotosharing.presentation.dto.UserProfileDTO;
 import local.epul4a.fotosharing.presentation.dto.UserRegistrationDTO;
-import local.epul4a.fotosharing.service.mapper.UserMapper;
+import local.epul4a.fotosharing.presentation.dto.UserSummaryDTO;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -16,12 +15,10 @@ public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
-    private final UserMapper userMapper;
 
-    public UserServiceImpl(UserRepository userRepository, PasswordEncoder passwordEncoder, UserMapper userMapper) {
+    public UserServiceImpl(UserRepository userRepository, PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
-        this.userMapper = userMapper;
     }
 
     @Override
@@ -44,10 +41,38 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public List<UserProfileDTO> findAllUsers() {
+    public List<UserSummaryDTO> getAllUsersSummary() {
         return userRepository.findAll()
                 .stream()
-                .map(userMapper::toUserProfileDTO)
+                .map(this::convertToUserSummaryDTO)
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    public void toggleUserStatus(Long userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("Utilisateur introuvable"));
+
+        user.setEnabled(!user.getEnabled());
+        userRepository.save(user);
+    }
+
+    @Override
+    public UserSummaryDTO getUserSummary(Long userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("Utilisateur introuvable"));
+
+        return convertToUserSummaryDTO(user);
+    }
+
+    // Méthode privée pour convertir User -> UserSummaryDTO
+    private UserSummaryDTO convertToUserSummaryDTO(User user) {
+        UserSummaryDTO dto = new UserSummaryDTO();
+        dto.setId(user.getId());
+        dto.setUsername(user.getUsername());
+        dto.setEmail(user.getEmail());
+        dto.setEnabled(user.getEnabled());
+        dto.setRole(user.getRole().name());
+        return dto;
     }
 }

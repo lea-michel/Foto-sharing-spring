@@ -1,10 +1,115 @@
 <!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Title</title>
-</head>
-<body>
+<html lang="fr"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout}">
 
-</body>
+<head>
+    <title>Administration - FotoSharing</title>
+</head>
+
+<section layout:fragment="content">
+    <div class="container mt-4">
+
+        <!-- En-tête -->
+        <div class="row mb-4">
+            <div class="col">
+                <h1><i class="bi bi-shield-lock"></i> Administration</h1>
+                <p class="text-muted">Gestion de l'application FotoSharing</p>
+            </div>
+        </div>
+
+        <!-- Messages -->
+        <div th:if="${message}" class="alert alert-success alert-dismissible fade show">
+            <i class="bi bi-check-circle"></i> <span th:text="${message}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+
+        <div th:if="${erreur}" class="alert alert-danger alert-dismissible fade show">
+            <i class="bi bi-exclamation-triangle"></i> <span th:text="${erreur}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+
+        <!-- Statistiques -->
+        <div class="row g-3 mb-4">
+            <div class="col-md-4">
+                <div class="card text-white bg-primary shadow">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h3 class="mb-0" th:text="${#lists.size(users)}">0</h3>
+                                <p class="mb-0">Utilisateurs</p>
+                            </div>
+                            <i class="bi bi-people" style="font-size: 3rem; opacity: 0.5;"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="card text-white bg-success shadow">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h3 class="mb-0" th:text="${#lists.size(users.?[enabled])}">0</h3>
+                                <p class="mb-0">Actifs</p>
+                            </div>
+                            <i class="bi bi-check-circle" style="font-size: 3rem; opacity: 0.5;"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="card text-white bg-danger shadow">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h3 class="mb-0" th:text="${#lists.size(users.?[!enabled])}">0</h3>
+                                <p class="mb-0">Désactivés</p>
+                            </div>
+                            <i class="bi bi-x-circle" style="font-size: 3rem; opacity: 0.5;"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Menu d'actions -->
+        <div class="row">
+            <div class="col-md-6 mb-3">
+                <div class="card shadow-sm h-100">
+                    <div class="card-body">
+                        <h5 class="card-title">
+                            <i class="bi bi-people-fill"></i> Gestion des utilisateurs
+                        </h5>
+                        <p class="card-text">
+                            Consulter, activer ou désactiver les comptes utilisateurs
+                        </p>
+                        <a th:href="@{/admin/users}" class="btn btn-primary">
+                            <i class="bi bi-gear"></i> Gérer les utilisateurs
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-6 mb-3">
+                <div class="card shadow-sm h-100">
+                    <div class="card-body">
+                        <h5 class="card-title">
+                            <i class="bi bi-arrow-left-circle"></i> Retour
+                        </h5>
+                        <p class="card-text">
+                            Retourner à la page d'accueil de l'application
+                        </p>
+                        <a th:href="@{/index}" class="btn btn-secondary">
+                            <i class="bi bi-house"></i> Page d'accueil
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
 </html>

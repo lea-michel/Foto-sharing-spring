@@ -1,4 +1,5 @@
-<nav class="navbar navbar-expand-lg" style="background-color: #e3f2fd;" data-bs-theme="light" th:fragment="header">
+<nav class="navbar navbar-expand-lg" style="background-color: #e3f2fd;" data-bs-theme="light" th:fragment="header"
+     xmlns:sec="http://www.w3.org/1999/xhtml">
     <div class="container-fluid">
         <a class="navbar-brand" th:href="@{/index}">FotoSharing</a>
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
@@ -22,6 +23,12 @@
                 </li>
                 <li class="nav-item" th:if="${#authentication.principal != 'anonymousUser'}">
                     <a class="nav-link" th:href="@{/photo/upload}">Upload</a>
+                </li>
+
+                <li class="nav-item" sec:authorize="hasRole('ADMIN')">
+                    <a class="nav-link text-danger" th:href="@{/admin}">
+                        <i class="bi bi-shield-lock"></i> Administration
+                    </a>
                 </li>
             </ul>
 

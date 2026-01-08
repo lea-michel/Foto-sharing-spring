@@ -1,10 +1,172 @@
 <!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Title</title>
-</head>
-<body>
+<html lang="fr"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout}">
 
-</body>
+<head>
+    <title>Gestion des utilisateurs - Admin</title>
+</head>
+
+<section layout:fragment="content">
+    <div class="container mt-4">
+
+        <!-- En-tête -->
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h1><i class="bi bi-people"></i> Gestion des utilisateurs</h1>
+                <p class="text-muted mb-0">
+                    <span th:text="${#lists.size(users)}">10</span> utilisateurs enregistrés
+                </p>
+            </div>
+            <a th:href="@{/admin}" class="btn btn-secondary">
+                <i class="bi bi-arrow-left"></i> Retour au tableau de bord
+            </a>
+        </div>
+
+        <!-- Messages -->
+        <div th:if="${message}" class="alert alert-success alert-dismissible fade show">
+            <i class="bi bi-check-circle"></i> <span th:text="${message}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+
+        <div th:if="${erreur}" class="alert alert-danger alert-dismissible fade show">
+            <i class="bi bi-exclamation-triangle"></i> <span th:text="${erreur}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+
+        <!-- Filtres rapides -->
+        <div class="btn-group mb-3" role="group">
+            <button type="button" class="btn btn-outline-primary active" onclick="filterUsers('all')">
+                Tous (<span th:text="${#lists.size(users)}">10</span>)
+            </button>
+            <button type="button" class="btn btn-outline-success" onclick="filterUsers('active')">
+                Actifs (<span th:text="${#lists.size(users.?[enabled])}">8</span>)
+            </button>
+            <button type="button" class="btn btn-outline-danger" onclick="filterUsers('inactive')">
+                Désactivés (<span th:text="${#lists.size(users.?[!enabled])}">2</span>)
+            </button>
+        </div>
+
+        <!-- Tableau des utilisateurs -->
+        <div class="card shadow">
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="table-light">
+                        <tr>
+                            <th>ID</th>
+                            <th>Nom d'utilisateur</th>
+                            <th>Email</th>
+                            <th>Rôle</th>
+                            <th>Statut</th>
+                            <th class="text-end">Actions</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr th:each="user : ${users}"
+                            th:data-status="${user.enabled ? 'active' : 'inactive'}"
+                            class="user-row">
+
+                            <!-- ID -->
+                            <td>
+                                <strong th:text="${user.id}">#1</strong>
+                            </td>
+
+                            <!-- Nom -->
+                            <td>
+                                <div class="d-flex align-items-center">
+                                    <i class="bi bi-person-circle me-2" style="font-size: 1.5rem;"></i>
+                                    <span th:text="${user.username}">John Doe</span>
+                                </div>
+                            </td>
+
+                            <!-- Email -->
+                            <td>
+                                <span th:text="${user.email}">john@example.com</span>
+                            </td>
+
+                            <!-- Rôle -->
+                            <td>
+                                    <span class="badge"
+                                          th:classappend="${user.role == 'ADMIN'} ? 'bg-danger' :
+                                                         (${user.role == 'MODERATOR'} ? 'bg-warning text-dark' : 'bg-info')"
+                                          th:text="${user.role}">
+                                        USER
+                                    </span>
+                            </td>
+
+                            <!-- Statut -->
+                            <td>
+                                    <span class="badge"
+                                          th:classappend="${user.enabled} ? 'bg-success' : 'bg-secondary'"
+                                          th:text="${user.enabled} ? 'Actif' : 'Désactivé'">
+                                        Actif
+                                    </span>
+                            </td>
+
+                            <!-- Actions -->
+                            <td class="text-end">
+                                <form th:action="@{/admin/users/{id}/toggle(id=${user.id})}"
+                                      method="post"
+                                      class="d-inline"
+                                      th:onsubmit="'return confirm(\'Êtes-vous sûr de vouloir ' + (${user.enabled} ? 'désactiver' : 'activer') + ' cet utilisateur ?\');'">
+
+                                    <!-- Bouton Désactiver -->
+                                    <button th:if="${user.enabled}"
+                                            type="submit"
+                                            class="btn btn-sm btn-outline-danger">
+                                        <i class="bi bi-x-circle"></i> Désactiver
+                                    </button>
+
+                                    <!-- Bouton Activer -->
+                                    <button th:if="${!user.enabled}"
+                                            type="submit"
+                                            class="btn btn-sm btn-outline-success">
+                                        <i class="bi bi-check-circle"></i> Activer
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Message si aucun utilisateur -->
+        <div th:if="${users == null or users.empty}" class="alert alert-info mt-3">
+            <i class="bi bi-info-circle"></i> Aucun utilisateur enregistré
+        </div>
+    </div>
+
+    <!-- Script pour filtrer les utilisateurs -->
+    <script th:inline="javascript">
+        function filterUsers(filter) {
+            const rows = document.querySelectorAll('.user-row');
+            const buttons = document.querySelectorAll('.btn-group button');
+
+            // Retirer la classe active de tous les boutons
+            buttons.forEach(btn => btn.classList.remove('active'));
+
+            // Ajouter la classe active au bouton cliqué
+            event.target.classList.add('active');
+
+            rows.forEach(row => {
+                const status = row.getAttribute('data-status');
+
+                if (filter === 'all') {
+                    row.style.display = '';
+                } else if (filter === 'active' && status === 'active') {
+                    row.style.display = '';
+                } else if (filter === 'inactive' && status === 'inactive') {
+                    row.style.display = '';
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+        }
+    </script>
+</section>
+
 </html>
