@@ -31,3 +31,35 @@ build/
 
 ### VS Code ###
 .vscode/
+
+
+# Fichiers uploadés par les utilisateurs
+
+uploads/
+uploads/**
+
+!uploads/.gitkeep
+!uploads/photos/
+!uploads/photos/.gitkeep
+!uploads/thumbnails/
+!uploads/thumbnails/.gitkeep
+
+application-local.properties
+
+*.log
+logs/
+
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Autres
+
+*.swp
+*.swo
+*~
+.cache

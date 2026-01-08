@@ -5,6 +5,9 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.util.List;
+
+//detail, admin, security
 @Getter
 @Setter
 @NoArgsConstructor
@@ -18,4 +21,5 @@ public class PhotoDetailsDTO {
     private String visibility;
     private UserProfileDTO owner;
     private String createdAt;
+    List<SharedUserDTO> sharedUsers;
 }

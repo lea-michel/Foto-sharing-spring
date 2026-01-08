@@ -5,13 +5,14 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+/**
+ * DTO pour transférer les informations nécessaires au chargement d'une image
+ */
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class CommentDTO {
-    private Long id;
-    private String text;
-    private String authorUsername;
-    private String createdAt;
+public class PhotoFileDTO {
+    private String storageFilename;
+    private String contentType;
 }

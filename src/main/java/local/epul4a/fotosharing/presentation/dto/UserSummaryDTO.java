@@ -5,13 +5,17 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+
+//pour lister les utilisateurs dans admin
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class CommentDTO {
+public class UserSummaryDTO {
     private Long id;
-    private String text;
-    private String authorUsername;
-    private String createdAt;
+
+    private String email;
+    private String username;
+    private Boolean enabled;
+    private String role;
 }

@@ -6,18 +6,17 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.springframework.web.multipart.MultipartFile;
 
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class PhotoUploadDTO {
+public class PhotoUpdateDTO {
     @NotBlank
     private String title;
+
     private String description;
+
     @NotNull
     private String visibility; // PUBLIC or PRIVATE
-    @NotNull
-    private MultipartFile file;
 }

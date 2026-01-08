@@ -1,5 +1,6 @@
 package local.epul4a.fotosharing.presentation.dto;
 
+import local.epul4a.fotosharing.data.entity.Visibility;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -14,8 +15,8 @@ public class PhotoDTO {
     private Long id;
     private String title;
     private String description;
-    private String url;           // URL publique (via Nginx)
-    private String ownerUsername;
-    private String visibility;
+    private String thumbnailUrl;
+    private Visibility visibility;
     private String createdAt;
+    private String imageUrl;
 }

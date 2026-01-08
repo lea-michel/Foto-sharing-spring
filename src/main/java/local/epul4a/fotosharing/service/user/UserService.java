@@ -1,4 +1,4 @@
-package local.epul4a.fotosharing.service;
+package local.epul4a.fotosharing.service.user;
 
 import local.epul4a.fotosharing.data.entity.User;
 import local.epul4a.fotosharing.presentation.dto.UserProfileDTO;

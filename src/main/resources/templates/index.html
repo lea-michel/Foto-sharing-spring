@@ -1,10 +1,120 @@
 <!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Title</title>
-</head>
-<body>
+<html lang="fr"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout}">
 
-</body>
+<head>
+    <style>
+        /* ✅ CSS pour les thumbnails */
+        .card-img-top {
+            width: 100%;
+            height: 200px;
+            object-fit: cover; /* Rogne l'image pour remplir le cadre */
+            object-position: center;
+        }
+
+        .card {
+            transition: transform 0.2s;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+    </style>
+</head>
+
+<section layout:fragment="content">
+    <div class="container">
+        <div class="row mb-3">
+            <div class="col">
+                <h1 class="text-center">Bienvenue dans le système de partage de Photos</h1>
+
+                <div th:if="${#authentication.principal != 'anonymousUser'}">
+                    <p>Bienvenue, <span th:text="${#authentication.name}">Utilisateur</span> !</p>
+                </div>
+
+                <div th:if="${#authentication.principal == 'anonymousUser'}">
+                    <p>Bienvenue invité ! Connectez-vous pour voir vos photos partagées.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Messages -->
+        <div th:if="${message}" class="alert alert-success alert-dismissible fade show" role="alert">
+            <span th:text="${message}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+
+        <div th:if="${erreur}" class="alert alert-danger alert-dismissible fade show" role="alert">
+            <span th:text="${erreur}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+
+        <a class="btn btn-primary mb-3"
+           th:if="${#authentication.principal != 'anonymousUser'}"
+           th:href="@{/photo/upload}">
+            <i class="bi bi-upload"></i> Ajouter une photo
+        </a>
+
+        <h2 class="text-center mb-4">Liste des photos</h2>
+
+        <div th:if="${photos.empty}" class="alert alert-info text-center mt-4">
+            Aucune photo à afficher pour le moment
+        </div>
+
+        <div class="container mt-4" th:if="${!photos.empty}">
+            <div class="row g-3">
+                <div class="col-6 col-md-4 col-lg-3" th:each="photo : ${photos}">
+                    <div class="card shadow-sm h-100">
+                        <a th:href="@{/photo/{id}(id=${photo.id})}" class="text-decoration-none">
+                            <img th:src="@{/thumb/{id}(id=${photo.id})}"
+                                 class="card-img-top"
+                                 th:alt="${photo.title}"/>
+                        </a>
+
+                        <div class="card-body p-2">
+                            <h6 class="card-title text-truncate mb-1" th:text="${photo.title}">Titre</h6>
+                            <small class="text-muted">
+                                <span class="badge"
+                                      th:classappend="${photo.visibility.name() == 'PUBLIC'} ? 'bg-success' : 'bg-warning text-dark'"
+                                      th:text="${photo.visibility}">PUBLIC</span>
+                            </small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Pagination -->
+        <nav class="mt-4" th:if="${photosPage.totalPages > 1}">
+            <ul class="pagination justify-content-center">
+                <li class="page-item" th:classappend="${photosPage.first} ? 'disabled'">
+                    <a class="page-link"
+                       th:href="@{/index(page=${photosPage.number - 1}, size=${photosPage.size})}">
+                        Précédent
+                    </a>
+                </li>
+
+                <li class="page-item"
+                    th:each="i : ${#numbers.sequence(0, photosPage.totalPages - 1)}"
+                    th:classappend="${i == photosPage.number} ? 'active'">
+                    <a class="page-link"
+                       th:text="${i + 1}"
+                       th:href="@{/index(page=${i}, size=${photosPage.size})}">
+                    </a>
+                </li>
+
+                <li class="page-item" th:classappend="${photosPage.last} ? 'disabled'">
+                    <a class="page-link"
+                       th:href="@{/index(page=${photosPage.number + 1}, size=${photosPage.size})}">
+                        Suivant
+                    </a>
+                </li>
+            </ul>
+        </nav>
+    </div>
+</section>
+
 </html>

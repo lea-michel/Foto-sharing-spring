@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="fr"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout}">
+
+<head>
+    <title th:text="${photo.title}">Détail Photo</title>
+</head>
+
+<section layout:fragment="content">
+    <div class="container mt-4">
+
+        <!-- Messages -->
+        <div th:if="${erreur}" class="alert alert-danger alert-dismissible fade show" role="alert">
+            <span th:text="${erreur}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+
+        <div th:if="${message}" class="alert alert-success alert-dismissible fade show" role="alert">
+            <span th:text="${message}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+
+        <!-- ✅ Message d'invitation pour utilisateurs non connectés -->
+        <div sec:authorize="!isAuthenticated()" th:if="${photo.visibility == 'PUBLIC'}" class="alert alert-info">
+            <i class="bi bi-info-circle"></i>
+            Cette photo est publique.
+            <a th:href="@{/login}" class="alert-link">Connectez-vous</a> pour commenter ou interagir avec l'auteur.
+        </div>
+
+        <div class="row">
+            <!-- Colonne gauche : Image -->
+            <div class="col-md-8">
+                <div class="card shadow-sm mb-3">
+                    <img th:src="@{/img/photos/{id}(id=${photo.id})}"
+                         class="card-img-top img-fluid"
+                         th:alt="${photo.title}"
+                         style="max-height: 600px; object-fit: contain; background-color: #f8f9fa;">
+
+                    <div class="card-body">
+                        <h3 class="card-title" th:text="${photo.title}">Titre</h3>
+                        <p class="card-text text-muted" th:text="${photo.description}">Description</p>
+                    </div>
+                </div>
+
+                <!-- Section Commentaires (uniquement si connecté ET peut commenter) -->
+                <div class="card shadow-sm" sec:authorize="isAuthenticated()" th:if="${permissions.canComment}">
+                    <div class="card-header bg-light">
+                        <h5 class="mb-0"><i class="bi bi-chat-left-text"></i> Commentaires</h5>
+                    </div>
+                    <div class="card-body">
+                        <!-- Formulaire d'ajout de commentaire -->
+                        <form th:action="@{/photo/{id}/comment(id=${photo.id})}" method="post" class="mb-3">
+                            <div class="mb-2">
+                                <textarea name="content" class="form-control" rows="3"
+                                          placeholder="Ajouter un commentaire..." required></textarea>
+                            </div>
+                            <button type="submit" class="btn btn-primary btn-sm">
+                                <i class="bi bi-send"></i> Commenter
+                            </button>
+                        </form>
+
+                        <div class="text-muted">
+                            <small><i class="bi bi-info-circle"></i> Soyez le premier à commenter cette photo</small>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Liste des commentaires -->
+                <div th:if="${comments != null and !comments.empty}">
+                    <h6 class="text-muted mb-3">
+                        <span th:text="${#lists.size(comments)}">5</span>
+                        <span th:text="${#lists.size(comments) > 1} ? 'commentaires' : 'commentaire'">commentaires</span>
+                    </h6>
+
+                    <div class="comment-item mb-3 pb-3 border-bottom" th:each="comment : ${comments}">
+                        <div class="d-flex justify-content-between align-items-start mb-2">
+                            <div>
+                                <strong class="text-primary">
+                                    <i class="bi bi-person-circle"></i>
+                                    <span th:text="${comment.authorUsername}">John Doe</span>
+                                </strong>
+                            </div>
+                            <small class="text-muted" th:text="${comment.createdAt}">
+                                2025-01-08 14:30
+                            </small>
+                        </div>
+                        <p class="mb-0" th:text="${comment.text}">
+                            Magnifique photo ! Les couleurs sont superbes.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Message si aucun commentaire -->
+                <div th:if="${comments == null or comments.empty}" class="text-center text-muted py-4">
+                    <i class="bi bi-chat-left-dots" style="font-size: 3rem; opacity: 0.3;"></i>
+                    <p class="mt-2 mb-0">Aucun commentaire pour le moment</p>
+                    <small th:if="${permissions.canComment}">Soyez le premier à commenter cette photo !</small>
+                </div>
+
+                <!-- Message pour utilisateurs non connectés -->
+                <div class="card shadow-sm" sec:authorize="!isAuthenticated()">
+                    <div class="card-body text-center">
+                        <i class="bi bi-lock" style="font-size: 2rem; color: #6c757d;"></i>
+                        <h5 class="mt-3">Connectez-vous pour commenter</h5>
+                        <p class="text-muted">Rejoignez la communauté pour interagir avec les photos</p>
+                        <a th:href="@{/login}" class="btn btn-primary">
+                            <i class="bi bi-box-arrow-in-right"></i> Se connecter
+                        </a>
+                        <a th:href="@{/register}" class="btn btn-outline-primary">
+                            <i class="bi bi-person-plus"></i> Créer un compte
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Colonne droite : Informations et Actions -->
+            <div class="col-md-4">
+                <!-- Informations -->
+                <div class="card shadow-sm mb-3">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="mb-0"><i class="bi bi-info-circle"></i> Informations</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <strong>Propriétaire :</strong><br>
+                            <span th:text="${photo.owner.email}">owner@example.com</span>
+                        </div>
+
+                        <div class="mb-3">
+                            <strong>Visibilité :</strong><br>
+                            <span class="badge"
+                                  th:classappend="${photo.visibility == 'PUBLIC'} ? 'bg-success' : 'bg-warning text-dark'"
+                                  th:text="${photo.visibility}">PUBLIC</span>
+                        </div>
+
+                        <div class="mb-3">
+                            <strong>Date d'ajout :</strong><br>
+                            <span th:text="${photo.createdAt}">08/01/2025</span>
+                        </div>
+
+                        <div class="mb-0">
+                            <strong>Nom du fichier :</strong><br>
+                            <small class="text-muted" th:text="${photo.originalFilename}">image.jpg</small>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Partages (seulement visible pour utilisateurs connectés avec droits) -->
+                <div class="card shadow-sm mb-3"
+                     sec:authorize="isAuthenticated()"
+                     th:if="${photo.sharedUsers != null and !photo.sharedUsers.empty}">
+                    <div class="card-header bg-info text-white">
+                        <h5 class="mb-0"><i class="bi bi-share"></i> Partagé avec</h5>
+                    </div>
+                    <div class="card-body p-0">
+                        <ul class="list-group list-group-flush">
+                            <li class="list-group-item d-flex justify-content-between align-items-center"
+                                th:each="share : ${photo.sharedUsers}">
+                                <div>
+                                    <strong th:text="${share.username}">Username</strong><br>
+                                    <small class="text-muted">
+                                        <span th:switch="${share.permission}">
+                                            <span th:case="'READ'">Lecture seule</span>
+                                            <span th:case="'COMMENT'">Peut commenter</span>
+                                            <span th:case="'ADMIN'">Administration</span>
+                                        </span>
+                                    </small>
+                                </div>
+                                <div>
+                                    <span class="badge rounded-pill"
+                                          th:classappend="${share.permission == 'ADMIN'} ? 'bg-danger' : (${share.permission == 'COMMENT'} ? 'bg-warning text-dark' : 'bg-info')"
+                                          th:text="${share.permission}">READ</span>
+
+                                    <form th:if="${permissions.owner}"
+                                          th:action="@{/photo/{photoId}/unshare/{userId}(photoId=${photo.id}, userId=${share.userId})}"
+                                          method="post"
+                                          class="d-inline"
+                                          onsubmit="return confirm('Retirer le partage ?');">
+                                        <button type="submit" class="btn btn-sm btn-outline-danger">
+                                            <i class="bi bi-x-circle"></i>
+                                        </button>
+                                    </form>
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Boutons d'action -->
+                <div class="card shadow-sm">
+                    <div class="card-body">
+                        <div class="d-grid gap-2">
+                            <!-- Retour (toujours visible) -->
+                            <a th:href="@{/index}" class="btn btn-secondary">
+                                <i class="bi bi-arrow-left"></i> Retour
+                            </a>
+
+                            <!-- Actions réservées aux utilisateurs connectés -->
+                            <div sec:authorize="isAuthenticated()">
+                                <!-- Partager (uniquement propriétaire) -->
+                                <a th:if="${permissions.owner}"
+                                   th:href="@{/photo/{id}/share(id=${photo.id})}"
+                                   class="btn btn-info">
+                                    <i class="bi bi-share"></i> Partager
+                                </a>
+
+                                <!-- Modifier (propriétaire ou ADMIN) -->
+                                <a th:if="${permissions.canAdmin}"
+                                   th:href="@{/photo/{id}/edit(id=${photo.id})}"
+                                   class="btn btn-warning">
+                                    <i class="bi bi-pencil"></i> Modifier
+                                </a>
+
+                                <!-- Supprimer (propriétaire uniquement) -->
+                                <button th:if="${permissions.canDelete}"
+                                        type="button"
+                                        class="btn btn-danger"
+                                        data-bs-toggle="modal"
+                                        data-bs-target="#deleteModal">
+                                    <i class="bi bi-trash"></i> Supprimer
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Légende des permissions (uniquement si connecté) -->
+                        <div class="mt-3 pt-3 border-top" sec:authorize="isAuthenticated()">
+                            <small class="text-muted">
+                                <strong>Vos droits :</strong><br>
+                                <span th:if="${permissions.owner}">
+                                    <i class="bi bi-check-circle-fill text-success"></i> Propriétaire
+                                </span>
+                                <span th:if="${!permissions.owner and permissions.canAdmin}">
+                                    <i class="bi bi-shield-fill-check text-danger"></i> Administration
+                                </span>
+                                <span th:if="${!permissions.owner and permissions.canComment and !permissions.canAdmin}">
+                                    <i class="bi bi-chat-left-text-fill text-warning"></i> Commentaires
+                                </span>
+                                <span th:if="${!permissions.owner and !permissions.canComment and !permissions.canAdmin and permissions.canRead}">
+                                    <i class="bi bi-eye-fill text-info"></i> Lecture seule
+                                </span>
+                            </small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal de confirmation de suppression (uniquement si connecté) -->
+        <div sec:authorize="isAuthenticated()" class="modal fade" id="deleteModal" tabindex="-1">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header bg-danger text-white">
+                        <h5 class="modal-title">
+                            <i class="bi bi-exclamation-triangle"></i> Confirmer la suppression
+                        </h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <p>Êtes-vous sûr de vouloir supprimer cette photo ?</p>
+                        <p class="text-danger"><strong>Cette action est irréversible.</strong></p>
+                        <ul>
+                            <li>Le fichier sera définitivement supprimé</li>
+                            <li>Tous les partages seront annulés</li>
+                            <li>Tous les commentaires seront perdus</li>
+                        </ul>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                        <form th:action="@{/photo/{id}/delete(id=${photo.id})}" method="post">
+                            <button type="submit" class="btn btn-danger">
+                                <i class="bi bi-trash"></i> Supprimer définitivement
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+</html>

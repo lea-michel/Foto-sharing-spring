@@ -5,9 +5,6 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.OnDelete;
-import org.hibernate.annotations.OnDeleteAction;
 
 import java.time.LocalDateTime;
 
@@ -35,14 +32,11 @@ public class Photo {
     private String contentType;
     @Enumerated(EnumType.STRING)
     private Visibility visibility = Visibility.PRIVATE;
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(
-            name = "owner_id",
-            nullable = false,
-            foreignKey = @ForeignKey(name = "fk_photo_owner")
-    )
-    @OnDelete(action = OnDeleteAction.CASCADE) // Active le ON DELETE CASCADE
+
+    @ManyToOne
+    @JoinColumn(name = "owner_id") // ne mets pas "foreignKey = @ForeignKey(name = "fk_photo_owner")"
     private User owner;
+
     @Column(name = "created_at",
             nullable = false,
             updatable = false,
